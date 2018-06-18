@@ -9,14 +9,19 @@
     <div class="container">
         <div class="panel panel-default">
             <!-- Default panel contents -->
-            <div class="panel-heading"><h1><a href="{% url "list" %}">{% trans "Issues" %}</a> - {{ object.name }}</h1></div>
+            <div class="panel-heading"><h1><a href="{% url "list" %}">{% trans "Issues" %}</a> - {{ object.name }}</h1>
+            </div>
 
             <div class="panel-body">
                 <table class="table table-user-information">
                     <tbody>
                     <tr>
                         <td style="width: 25%">{% trans "Name" %}</td>
-                        <td style="width: 75%">{{ object.name }}</td>
+                        <td style="width: 75%">{% if perms.tracker.change_issue %}
+                            <a href="#" id="name" data-type="text" data-pk="1" data-emptytext="{% trans "Empty" %}"
+                               data-url="{% url "issue-edit" object.pk %}" data-name="name"
+                               data-title="{% trans "Enter name" %}">{{ object.name }}</a>{% else %}
+                            {{ object.name }}{% endif %}</td>
                     </tr>
                     <tr>
                         <td style="width: 25%">{% trans "Created by" %}</td>
@@ -28,7 +33,13 @@
                     </tr>
                     <tr>
                         <td style="width: 25%">{% trans "Category" %}</td>
-                        <td style="width: 75%">{{ object.category|default_if_none:"" }}</td>
+                        <td style="width: 75%">{% if perms.tracker.change_issue %}
+                            <a href="#" id="category" data-type="select" data-pk="1"
+                               data-url="{% url "issue-edit" object.pk %}"
+                               data-emptytext="{% trans "Empty" %}"
+                               data-title="{% trans "Select category" %}"
+                               data-name="category"></a>{% else %}
+                            {{ object.category|default_if_none:"" }}{% endif %}</td>
                     </tr>
                     <tr>
                         <td style="width: 25%">{% trans "State" %}</td>
@@ -36,9 +47,28 @@
                     </tr>
                     </tbody>
                 </table>
-                <p>{{ object.description }}</p>
+                <p>{% if perms.tracker.change_issue %}
+                    <a href="#" id="description" data-type="textarea" data-pk="1" data-rows=10
+                       data-emptytext="{% trans "Empty" %}"
+                       data-url="{% url "issue-edit" object.pk %}" data-name="description"
+                       data-title="{% trans "Enter name" %}">{{ object.description }}</a>
+                {% else %}{{ object.description }}{% endif %}</p>
 
             </div>
         </div>
     </div>
+{% endblock %}
+{% block scripts %}
+    <script>
+        $("#name").editable();
+        $("#description").editable();
+        $('#category').editable({
+            {% if object.category %}value: {{ object.category_id }},{% endif %}
+            source: [
+                {% for category in categories %}
+                    {value: {{ category.0 }}, text: '{{ category.1 }}'},
+                {% endfor %}
+            ]
+        });
+    </script>
 {% endblock %}

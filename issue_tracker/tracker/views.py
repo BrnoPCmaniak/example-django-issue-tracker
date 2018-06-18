@@ -1,7 +1,9 @@
 from django.db.models import Avg, Max, Min
-from django.views.generic import ListView, DetailView
+from django.views.generic import DetailView, ListView
 
-from .models import Issue
+from .forms import IssueEditForm
+from .models import Issue, IssueCategory
+from .tools import BootstrapEditableView
 
 
 class ListIssueView(ListView):
@@ -21,3 +23,14 @@ class ListIssueView(ListView):
 class DetailIssueView(DetailView):
     model = Issue
     template_name = "tracker/detail.html"
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        context["categories"] = [(c.pk, c.name) for c in IssueCategory.objects.all()]
+        return context
+
+
+class IssueEditView(BootstrapEditableView):
+    model = Issue
+    form_class = IssueEditForm
+    fields = ["name", "category", "description"]
