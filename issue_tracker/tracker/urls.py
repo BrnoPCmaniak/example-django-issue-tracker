@@ -1,7 +1,7 @@
 from django.contrib.auth import views as auth_views
 from django.urls import path
 
-from .views import ListIssueView
+from .views import ListIssueView, DetailIssueView
 
 urlpatterns = [
     path('accounts/login', auth_views.login,
@@ -11,4 +11,5 @@ urlpatterns = [
          {'next_page': '/accounts/login?logout=1'}, name='logout'
          ),
     path('home', ListIssueView.as_view(), name="list"),
+    path('issue/<int:pk>/', DetailIssueView.as_view(), name='issue-detail'),
 ]

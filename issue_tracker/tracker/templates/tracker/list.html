@@ -9,7 +9,7 @@
     <div class="container">
         <div class="panel panel-default">
             <!-- Default panel contents -->
-            <div class="panel-heading"><h1>{% trans "Issues" %}</h1></div>
+            <div class="panel-heading"><h1><a href="{% url "list" %}">{% trans "Issues" %}</a></h1></div>
 
             {% if avg != None and min != None and max != None %}
                 <div class="panel-body">
@@ -60,7 +60,7 @@
                 <tbody>
                 {% for issue in object_list %}
                     <tr>
-                        <td>{{ issue.name }}</td>
+                        <td><a href="{{ issue.get_absolute_url }}">{{ issue.name }}</a></td>
                         <td>{{ issue.created_by }}</td>
                         <td>{{ issue.solver|default_if_none:"" }}</td>
                         <td>{{ issue.category.name }}</td>

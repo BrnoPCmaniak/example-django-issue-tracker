@@ -56,6 +56,10 @@ class Issue(models.Model):
     def __str__(self):
         return self.name
 
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('issue-detail', args=[str(self.id)])
+
     class Meta:
         verbose_name = _("Issue")
         verbose_name_plural = _("Issues")

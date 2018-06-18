@@ -16,3 +16,8 @@ class ListIssueView(ListView):
         context["min"] = numbers["completed_in__min"]
         context["max"] = numbers["completed_in__max"]
         return context
+
+
+class DetailIssueView(DetailView):
+    model = Issue
+    template_name = "tracker/detail.html"

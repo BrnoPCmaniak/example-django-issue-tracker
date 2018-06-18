@@ -1,0 +1,44 @@
+{% extends "tracker/base.html" %}
+
+{% load i18n %}
+{% load static %}
+{% load cache %}
+{% load mathfilters %}
+
+{% block body %}
+    <div class="container">
+        <div class="panel panel-default">
+            <!-- Default panel contents -->
+            <div class="panel-heading"><h1><a href="{% url "list" %}">{% trans "Issues" %}</a> - {{ object.name }}</h1></div>
+
+            <div class="panel-body">
+                <table class="table table-user-information">
+                    <tbody>
+                    <tr>
+                        <td style="width: 25%">{% trans "Name" %}</td>
+                        <td style="width: 75%">{{ object.name }}</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 25%">{% trans "Created by" %}</td>
+                        <td style="width: 75%">{{ object.created_by }}</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 25%">{% trans "Solver" %}</td>
+                        <td style="width: 75%">{{ object.solver|default_if_none:"" }}</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 25%">{% trans "Category" %}</td>
+                        <td style="width: 75%">{{ object.category|default_if_none:"" }}</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 25%">{% trans "State" %}</td>
+                        <td style="width: 75%">{{ object.get_state_display }}</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <p>{{ object.description }}</p>
+
+            </div>
+        </div>
+    </div>
+{% endblock %}
