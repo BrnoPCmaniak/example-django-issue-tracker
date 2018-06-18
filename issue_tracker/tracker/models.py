@@ -11,8 +11,8 @@ ISSUE_CREATED = "cre"
 ISSUE_STATE_CHOICES = (
     (ISSUE_ASSIGNED, _("Assigned")),
     (ISSUE_DONE, _("Done")),
-    (ISSUE_CANCELED, _("Canceled.")),
-    (ISSUE_CREATED, _("Created."))
+    (ISSUE_CANCELED, _("Canceled")),
+    (ISSUE_CREATED, _("Created"))
 )
 
 
@@ -22,6 +22,10 @@ class IssueCategory(models.Model):
     class Meta:
         verbose_name = _("Issue category")
         verbose_name_plural = _("Issue categories")
+
+
+    def __str__(self):
+        return self.name
 
 
 class Issue(models.Model):
@@ -47,6 +51,9 @@ class Issue(models.Model):
         elif self.state == ISSUE_DONE and self.completed_in is None:
             self.completed_in = datetime.now() - self.created_at
         super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
 
     class Meta:
         verbose_name = _("Issue")
