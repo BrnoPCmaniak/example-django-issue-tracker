@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'debug_toolbar',
     'tracker.apps.TrackerConfig',
+    'mathfilters',
 ]
 
 MIDDLEWARE = [
