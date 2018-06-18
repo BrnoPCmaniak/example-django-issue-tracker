@@ -23,7 +23,6 @@ class IssueCategory(models.Model):
         verbose_name = _("Issue category")
         verbose_name_plural = _("Issue categories")
 
-
     def __str__(self):
         return self.name
 
@@ -43,13 +42,15 @@ class Issue(models.Model):
     description = models.TextField(verbose_name=_("Description"), help_text=_("The description of the issue."))
     completed_in = models.DurationField(blank=True, null=True, verbose_name=_("Completed in"),
                                         help_text=_("The time duration in which the task was completed."))
+    assigned_at = models.DateTimeField(verbose_name=_("Assiged at"), blank=True, null=True)
     created_at = models.DateTimeField(verbose_name=_("Created"), auto_now_add=True)
 
     def save(self, *args, **kwargs):
         if self.state == ISSUE_CREATED and self.solver is not None:
             self.state = ISSUE_ASSIGNED
+            self.assigned_at = datetime.now()
         elif self.state == ISSUE_DONE and self.completed_in is None:
-            self.completed_in = datetime.now() - self.created_at
+            self.completed_in = datetime.now() - self.assigned_at
         super().save(*args, **kwargs)
 
     def __str__(self):
