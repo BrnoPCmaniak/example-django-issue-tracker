@@ -1,0 +1,74 @@
+{% extends "tracker/base.html" %}
+
+{% load i18n %}
+{% load static %}
+{% load cache %}
+{% load mathfilters %}
+
+{% block body %}
+    <div class="container">
+        <div class="panel panel-default">
+            <!-- Default panel contents -->
+            <div class="panel-heading"><h1>{% trans "Issues" %}</h1></div>
+
+            {% if avg != None and min != None and max != None %}
+                <div class="panel-body">
+                    <h2>{% trans "Time statistics" %}</h2>
+                    <h4>{% trans "Minimal time to complete task" %}</h4>
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-success" role="progressbar"
+                             aria-valuenow="{{ min.seconds }}"
+                             aria-valuemin="{{ min.seconds }}"
+                             aria-valuemax="{{ max.seconds }}"
+                             style="width: {{ min.seconds|div:max.seconds|mul:100 }}%;min-width: 5em;">
+                            {{ min }}
+                        </div>
+                    </div>
+                    <h4>{% trans "Average time to complete task" %}</h4>
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-danger" role="progressbar"
+                             aria-valuenow="{{ avg.seconds }}"
+                             aria-valuemin="{{ min.seconds }}"
+                             aria-valuemax="{{ max.seconds }}"
+                             style="width: {{ avg.seconds|div:max.seconds|mul:100 }}%;min-width: 5em;">
+                            {{ avg }}
+                        </div>
+                    </div>
+                    <h4>{% trans "Maximal time to complete task" %}</h4>
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" aria-valuenow="{{ max.seconds }}"
+                             aria-valuemin="{{ min.seconds }}"
+                             aria-valuemax="{{ max.seconds }}" style="width: 100%">
+                            {{ max }}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+
+            <!-- Table -->
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>{% trans "Name" %}</th>
+                    <th>{% trans "Created by" %}</th>
+                    <th>{% trans "Solver" %}</th>
+                    <th>{% trans "Category" %}</th>
+                    <th>{% trans "State" %}</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for issue in object_list %}
+                    <tr>
+                        <td>{{ issue.name }}</td>
+                        <td>{{ issue.created_by }}</td>
+                        <td>{{ issue.solver|default_if_none:"" }}</td>
+                        <td>{{ issue.category.name }}</td>
+                        <td>{{ issue.get_state_display }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
