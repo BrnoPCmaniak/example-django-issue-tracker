@@ -1,0 +1,85 @@
+{% load i18n %}{% load static %}{% load cache %}{% get_current_language as LANGUAGE_CODE %}<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+  <head>
+    {% cache 86400 base_head %}
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="author" content="Filip Dobrovolny">
+    {% endcache %}
+    {% block robots %}<meta name="robots" content="noindex, nofollow, noarchive">{% endblock %}
+    {% cache 86400 base_head_css %}
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awsome -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+
+    <!-- X-editable CSS -->
+    <link href="http://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet"/>
+
+    <!-- Bootstrap-Select -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.7.3/css/bootstrap-select.min.css" rel="stylesheet"/>
+
+    <!-- Ajax-Bootsrap-Select -->
+    <link rel="stylesheet" href="{% static "tracker/ajax-bootstrap-select.css" %}"/>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+{% endcache %}
+    <title>Issue tracker - {% block title %}{% endblock %}</title>
+
+    {# Custom styles for templates #}
+    {% block css %}{% endblock %}
+
+  </head>
+
+
+  <body>
+    {% block body %} {% endblock %}
+    {% cache 86400 base_js %}
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <!-- x-editable -->
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap3-editable/js/bootstrap-editable.min.js"></script>
+    <!-- bootstrap-select -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.7.3/js/bootstrap-select.min.js"></script>
+    <!-- ajax-bootstrap-select -->
+    <script type="text/javascript" src="{% static "tracker/ajax-bootstrap-select.min.js" %}"></script>
+    <!-- CSRF token protection -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.1.2/js.cookie.min.js"></script>
+    <script type="text/javascript" src="{% static "tracker/jquery.djangocsrf-0.1.1.min.js" %}"></script>
+    <script type="text/javascript">
+      var csrftoken = Cookies.get('csrftoken');
+      // New calls via AJAX
+      function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+      }
+      $.ajaxSetup({
+          beforeSend: function(xhr, settings) {
+              if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                  xhr.setRequestHeader("X-CSRFToken", csrftoken);
+              }
+          }
+      });
+      // Old calls
+      $.djangocsrf("enable");
+    </script>
+    {% endcache %}
+    <!-- System wide setings-->
+    <script type="text/javascript">var LANGUAGE_CODE = "{{ LANGUAGE_CODE }}"; $.fn.editable.defaults.mode = 'inline'</script>
+    {% block base_scripts %}{% endblock %}
+    {% block scripts %}{% endblock %}
+
+    <svg style="visibility: hidden; position: absolute; top: -100%; left: -100%;" preserveAspectRatio="none" viewBox="0 0 200 200" height="200" width="200"><defs></defs><text style="font-weight:bold;font-size:10pt;font-family:Arial, Helvetica, Open Sans, sans-serif;dominant-baseline:middle" y="10" x="0">200x200</text></svg>
+  </body>
+</html>

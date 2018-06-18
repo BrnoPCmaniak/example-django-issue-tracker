@@ -1,0 +1,46 @@
+{% extends "tracker/base.html" %}
+
+{% load i18n %}
+{% load static %}
+{% load cache %}
+
+{% block title %}{% trans "Log in" %}{% endblock %}
+
+{% block css %}<link href="{% static "tracker/signin.css" %}" rel="stylesheet">{% endblock %}
+
+{% block body %}
+  <div class="container">
+    {% cache 86400 signin_logout_message LANGUAGE_CODE request.GET.logout %}
+      {% if request.GET.logout %}
+        <div class="alert alert-success" role="alert">
+          <strong>{% trans "Success" %}:</strong>
+          {% trans "You have been successfully logged out." %}
+        </div>
+      {% endif %}
+    {% endcache %}
+
+    {% cache 86400 signin_errors LANGUAGE_CODE form.errors.items %}
+      {% if form.errors.items|length == 1 and form.non_field_errors %}
+        <div class="alert alert-danger" role="alert">
+          <strong>{% trans "Error" %}: </strong>
+          {{ form.non_field_errors.0 }}</div>
+      {% endif %}
+    {% endcache %}
+
+    <form class="form-signin" action="{{ app_path }}" method="post" id="login-form" >
+      {% csrf_token %}
+      {% cache 86400 signin_form LANGUAGE_CODE %}
+        <h2 class="form-signin-heading">{% trans "Please log in"%}</h2>
+
+        <label for="{{ form.username.id_for_label }}" class="sr-only">{% trans "Username" %}</label>
+        <input name="{{ form.username.html_name }}" id="{{ form.username.id_for_label }}" class="form-control" placeholder="{% trans "Username" %}" required="" autofocus="" type="text">
+
+        <label for="{{ form.password.id_for_label }}" class="sr-only">{% trans "Password" %}</label>
+        <input name="{{ form.password.html_name }}" id="{{ form.password.id_for_label }}" class="form-control" placeholder="{% trans "Password" %}" required="" type="password">
+
+
+        <button class="btn btn-lg btn-primary btn-block" name="submit" type="submit">{% trans "Log in" %}</button>
+      {% endcache %}
+    </form>
+  </div>
+{% endblock %}
