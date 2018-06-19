@@ -5,10 +5,10 @@ from django.core.exceptions import ImproperlyConfigured
 from django.db import models
 from django.db.models import Q, QuerySet
 from django.forms import forms
-from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
+from django.http import HttpResponse, HttpResponseForbidden, HttpResponseRedirect, JsonResponse
 from django.views import View
 from django.views.generic.detail import SingleObjectMixin
-from django.views.generic.edit import FormMixin
+from django.views.generic.edit import DeleteView, FormMixin
 
 
 class NoDefaultProvided(object):
@@ -252,3 +252,11 @@ class AjaxBootstrapSelectView(View):
         objects = self.get_objects()
         json_list = self.prepare_json_list(objects)
         return JsonResponse(json_list, safe=False)
+
+
+class DeleteRedirectView(DeleteView):
+    """DeleteRedirectView is same as DeleteView, but ignores confirmation."""
+
+    def get(self, request, *args, **kwargs) -> Union[HttpResponseRedirect, HttpResponseForbidden]:
+        """Overwrite get method to skip confirmation."""
+        return self.delete(request, *args, **kwargs)

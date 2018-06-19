@@ -1,7 +1,8 @@
-from datetime import datetime
+from datetime import timedelta
 
 from django.contrib.auth.models import User
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 ISSUE_ASSIGNED = "ass"
@@ -48,9 +49,9 @@ class Issue(models.Model):
     def save(self, *args, **kwargs):
         if self.state == ISSUE_CREATED and self.solver is not None:
             self.state = ISSUE_ASSIGNED
-            self.assigned_at = datetime.now()
+            self.assigned_at = timezone.now()
         elif self.state == ISSUE_DONE and self.completed_in is None:
-            self.completed_in = datetime.now() - self.assigned_at
+            self.completed_in = timedelta(seconds=int((timezone.now() - self.assigned_at).seconds))
         super().save(*args, **kwargs)
 
     def __str__(self):
