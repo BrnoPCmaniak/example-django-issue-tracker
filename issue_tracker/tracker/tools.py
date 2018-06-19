@@ -1,9 +1,11 @@
 from functools import reduce
-from typing import Union
+from typing import Callable, Dict, List, Optional, Union
 
+from django.core.exceptions import ImproperlyConfigured
 from django.db import models
+from django.db.models import Q, QuerySet
 from django.forms import forms
-from django.http import HttpResponse, HttpResponseForbidden
+from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from django.views import View
 from django.views.generic.detail import SingleObjectMixin
 from django.views.generic.edit import FormMixin
@@ -63,6 +65,25 @@ def http_response_code(code: int, message: str = None) -> HttpResponse:
         tmp = HttpResponse(content_type="application/javascript")
     tmp.status_code = code
     return tmp
+
+
+def merge_queries(queries: List[Q], func: Callable[[Q, Q], Q]) -> Q:
+    """Merge list of Q into single Q."""
+    fin_query = queries.pop()
+    for q in queries:
+        fin_query = func(fin_query, q)
+
+    return fin_query
+
+
+def or_merge_queries(queries: List[Q]) -> Q:
+    """Or merge list of Q into single Q."""
+    return merge_queries(queries, lambda fin, q: fin | q)
+
+
+def and_merge_queries(queries: List[Q]) -> Q:
+    """And merge list of Q into single Q."""
+    return merge_queries(queries, lambda fin, q: fin & q)
 
 
 class BootstrapEditableView(FormMixin, SingleObjectMixin, View):
@@ -162,3 +183,72 @@ class BootstrapEditableView(FormMixin, SingleObjectMixin, View):
             self.save_object(self.object, found_model_to_save, found_model_field,
                              form_instance.cleaned_data[found_form_field])
             return http_response_code(200)
+
+
+class AjaxBootstrapSelectView(View):
+    """Return JSON data from search for Ajax-Bootstrap-Select."""
+
+    # names to be compatible with SingleObjectMixin
+    search_model = None
+    search_queryset = None
+    field = "name"
+    enable_empty_requests = False
+
+    def get_query(self) -> Q:
+        """Return query used for looking for object."""
+        return Q(**{self.get_field() + "__icontains": self.request.POST["q"]})
+
+    def get_objects(self, queryset=None) -> QuerySet:
+        """Filter given queryset and returns list of objects."""
+        if queryset is None:
+            queryset = self.get_search_queryset()
+
+        try:
+            if self.request.POST["q"].strip() is "":
+                return self.get_objects_on_empty(queryset)
+        except KeyError:
+            return self.get_objects_on_empty(queryset)
+
+        return queryset.filter(self.get_query())
+
+    def get_objects_on_empty(self, queryset=None) -> Union[QuerySet, list]:
+        """Called when POST["q"].strip() is ""."""
+        if not self.enable_empty_requests:
+            return []
+        else:
+            return queryset
+
+    def get_field(self) -> Optional[str]:
+        """Return self.field."""
+        return self.field
+
+    def get_search_queryset(self) -> QuerySet:
+        """Get QuerySet for searching.
+
+        Return the `QuerySet` that will be used to look up the object.
+        Note that this method is called by the default implementation of
+        `get_object` and may not be called if `get_object` is overridden.
+        """
+        if self.search_queryset is None:
+            if self.search_model:
+                return self.search_model._default_manager.all()
+            else:
+                raise ImproperlyConfigured(
+                    "%(cls)s is missing a QuerySet. Define "
+                    "%(cls)s.search_model, %(cls)s.search_queryset, or override "
+                    "%(cls)s.get_search_queryset()." % {
+                        'cls': self.__class__.__name__
+                    }
+                )
+        return self.search_queryset.all()
+
+    def prepare_json_list(self, obj_list) -> List[Dict[str, str]]:
+        """Create list of dicts for json."""
+        return [{"ID": obj.pk, "Name": getattr(obj, self.get_field())}
+                for obj in obj_list]
+
+    def post(self, request, *args, **kwargs) -> JsonResponse:
+        """Handle POST requests."""
+        objects = self.get_objects()
+        json_list = self.prepare_json_list(objects)
+        return JsonResponse(json_list, safe=False)

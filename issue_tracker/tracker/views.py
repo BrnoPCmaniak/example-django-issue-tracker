@@ -1,9 +1,12 @@
-from django.db.models import Avg, Max, Min
+from typing import Dict, List
+
+from django.contrib.auth.models import User
+from django.db.models import Avg, Max, Min, Q
 from django.views.generic import DetailView, ListView
 
 from .forms import IssueEditForm
 from .models import Issue, IssueCategory
-from .tools import BootstrapEditableView
+from .tools import AjaxBootstrapSelectView, BootstrapEditableView, and_merge_queries
 
 
 class ListIssueView(ListView):
@@ -33,4 +36,22 @@ class DetailIssueView(DetailView):
 class IssueEditView(BootstrapEditableView):
     model = Issue
     form_class = IssueEditForm
-    fields = ["name", "category", "description"]
+    fields = ["name", "category", "description", "solver"]
+
+
+class UserSelectView(AjaxBootstrapSelectView):
+    search_model = User
+
+    def get_query(self) -> Q:
+        """Make query to look in user in first_name, last_name and username."""
+        queries = []
+        for q in self.request.POST["q"].split(" "):
+            queries.append(Q(first_name__icontains=q) |
+                           Q(last_name__icontains=q) |
+                           Q(username__icontains=q))
+        return and_merge_queries(queries)
+
+    def prepare_json_list(self, obj_list) -> List[Dict[str, str]]:
+        """Create list of dicts for json."""
+        return [{"ID": obj.pk, "Name": obj.get_full_name() or obj.username, "Username": obj.username} for obj in
+                obj_list]

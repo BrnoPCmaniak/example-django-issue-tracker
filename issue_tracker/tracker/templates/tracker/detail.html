@@ -29,7 +29,15 @@
                     </tr>
                     <tr>
                         <td style="width: 25%">{% trans "Solver" %}</td>
-                        <td style="width: 75%">{{ object.solver|default_if_none:"" }}</td>
+                        <td style="width: 75%">{% if perms.tracker.change_issue and object.solver == None %}
+                            <select id="ajax-select" class="selectpicker with-ajax"
+                                    data-live-search="true"></select>
+                            <button id="ajax-add" type="button" class="btn btn-primary btn-sm adder-buttons"><i
+                                    class="glyphicon glyphicon-ok"></i></button>
+                            <button id="ajax-clear" type="button" class="btn btn-danger btn-sm adder-buttons"><i
+                                    class="glyphicon glyphicon-trash"></i></button>
+                        {% else %}
+                            {{ object.solver|default_if_none:"" }}{% endif %}</td>
                     </tr>
                     <tr>
                         <td style="width: 25%">{% trans "Category" %}</td>
@@ -70,5 +78,50 @@
                 {% endfor %}
             ]
         });
+        var options = {
+            ajax: {
+                url: "/users",
+                type: 'POST',
+                dataType: 'json',
+                // Use {% verbatim %}"{{{q}}}"{% endverbatim %} as a placeholder and Ajax Bootstrap Select will
+                // automatically replace it with the value of the search query.
+                data: {
+                    q: '{% verbatim %}{{{q}}}{% endverbatim %}'
+                }
+            },
+            langCode: LANGUAGE_CODE,
+            log: 3,
+            preprocessData: function (data) {
+                var i, l = data.length, array = [];
+                if (l) {
+                    for (i = 0; i < l; i++) {
+                        array.push($.extend(true, data[i], {
+                            text: data[i].Name,
+                            value: data[i].ID,
+                            data: {
+                                subtext: data[i].Username
+                            }
+                        }));
+                    }
+                }
+                return array;
+            }
+        };
+
+        $('.selectpicker').selectpicker().filter('.with-ajax').ajaxSelectPicker(options)
+        $(document).on('click', '#ajax-clear', function () {
+            $("#ajax-select").val('').trigger('change');
+        })
+
+        $(document).on('click', '#ajax-add', function () {
+            $.post("{% url "issue-edit" object.pk %}", {
+                "name": "solver",
+                "value": $("#ajax-select").val()
+            }).done(function (data) {
+                location.reload();
+            });
+        });
+
+
     </script>
 {% endblock %}
