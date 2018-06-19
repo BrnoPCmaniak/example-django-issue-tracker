@@ -1,0 +1,33 @@
+{% load widget_tweaks %}
+{% if form.is_bound %}
+    {% if field.errors %}
+        <div class="form-group has-error">
+            {{ field.label_tag }}
+            {% render_field field class+="form-control" %}
+            {% for error in field.errors %}
+                <span class="help-block">
+        {{ error }}
+    </span>
+            {% endfor %}
+            {% if field.help_text %}
+                <span class="help-block">{{ field.help_text }}</span>
+            {% endif %}
+        </div>
+    {% else %}
+        <div class="form-group has-success">
+            {{ field.label_tag }}
+            {% render_field field class+="form-control" %}
+            {% if field.help_text %}
+                <span class="help-block">{{ field.help_text }}</span>
+            {% endif %}
+        </div>
+    {% endif %}
+{% else %}
+    <div class="form-group">
+        {{ field.label_tag }}
+        {% render_field field class+="form-control" %}
+        {% if field.help_text %}
+            <span class="help-block">{{ field.help_text }}</span>
+        {% endif %}
+    </div>
+{% endif %}

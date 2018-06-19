@@ -2,7 +2,8 @@ from typing import Dict, List
 
 from django.contrib.auth.models import User
 from django.db.models import Avg, Max, Min, Q
-from django.views.generic import DetailView, ListView
+from django.http import HttpResponseRedirect
+from django.views.generic import CreateView, DetailView, ListView
 
 from .forms import IssueEditForm
 from .models import Issue, IssueCategory
@@ -55,3 +56,15 @@ class UserSelectView(AjaxBootstrapSelectView):
         """Create list of dicts for json."""
         return [{"ID": obj.pk, "Name": obj.get_full_name() or obj.username, "Username": obj.username} for obj in
                 obj_list]
+
+
+class IssueCreateView(CreateView):
+    model = Issue
+    fields = ("name", "category", "description")
+
+    def form_valid(self, form):
+        """If the form is valid, save the associated model."""
+        self.object = form.save(commit=False)
+        self.object.created_by = self.request.user
+        self.object.save()
+        return HttpResponseRedirect(self.get_success_url())

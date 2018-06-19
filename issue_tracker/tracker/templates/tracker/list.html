@@ -11,8 +11,8 @@
             <!-- Default panel contents -->
             <div class="panel-heading"><h1><a href="{% url "list" %}">{% trans "Issues" %}</a></h1></div>
 
-            {% if avg != None and min != None and max != None %}
-                <div class="panel-body">
+            <div class="panel-body">
+                {% if avg != None and min != None and max != None %}
                     <h2>{% trans "Time statistics" %}</h2>
                     <h4>{% trans "Minimal time to complete task" %}</h4>
                     <div class="progress">
@@ -42,8 +42,10 @@
                             {{ max }}
                         </div>
                     </div>
-                </div>
-            {% endif %}
+                {% endif %}
+                {% if perms.tracker.change_issue %}
+                    <a href="{% url "issue-create" %}" class="btn btn-primary">{% trans "Create issue" %}</a>{% endif %}
+            </div>
 
 
             <!-- Table -->
