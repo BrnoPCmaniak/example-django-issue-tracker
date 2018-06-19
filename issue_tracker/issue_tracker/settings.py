@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'tracker.apps.TrackerConfig',
     'mathfilters',
+    'widget_tweaks',
 ]
 
 MIDDLEWARE = [
