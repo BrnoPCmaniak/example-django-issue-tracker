@@ -18,7 +18,6 @@ from .tools import (
 class ListIssueView(LoginRequiredMixin, ListView):
     """List all the issues and add time statistics."""
     model = Issue
-    template_name = "tracker/list.html"
 
     def get_context_data(self, *args, **kwargs) -> dict:
         context = super().get_context_data(*args, **kwargs)
@@ -33,7 +32,6 @@ class ListIssueView(LoginRequiredMixin, ListView):
 class DetailIssueView(LoginRequiredMixin, DetailView):
     """Show detail for one specific issue."""
     model = Issue
-    template_name = "tracker/detail.html"
 
     def get_context_data(self, *args, **kwargs) -> dict:
         context = super().get_context_data(*args, **kwargs)
