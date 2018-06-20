@@ -19,7 +19,7 @@ python3 issue_tracker/manage.py createsuperuser
 python3 issue_tracker/manage.py runserver 0.0.0.0:8080
 ```
 
-**The project is now availible at [http://127.0.0.1:8080](http://127.0.0.1:8080)**
+**The project is now available at [http://127.0.0.1:8080](http://127.0.0.1:8080)**
 
 ## How to use this software
 
