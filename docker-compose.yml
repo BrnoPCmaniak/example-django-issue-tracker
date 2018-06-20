@@ -1,0 +1,25 @@
+version: "3"
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: psql_passwd
+    ports:
+      - "5432:5432"
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    image: example-django-issue-tracker:latest
+    volumes:
+      - .:/code:Z
+    ports:
+      - "8080:8080"
+    environment:
+      - DEBUG=true
+      - DEBUG_TOOLBAR=true
+      - DATABASE_URL=postgres://postgres:psql_passwd@db:5432/postgres
+    depends_on:
+      - db
+
