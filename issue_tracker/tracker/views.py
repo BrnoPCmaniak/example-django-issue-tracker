@@ -16,6 +16,7 @@ from .tools import (
 
 
 class ListIssueView(LoginRequiredMixin, ListView):
+    """List all the issues and add time statistics."""
     model = Issue
     template_name = "tracker/list.html"
 
@@ -30,6 +31,7 @@ class ListIssueView(LoginRequiredMixin, ListView):
 
 
 class DetailIssueView(LoginRequiredMixin, DetailView):
+    """Show detail for one specific issue."""
     model = Issue
     template_name = "tracker/detail.html"
 
@@ -39,16 +41,18 @@ class DetailIssueView(LoginRequiredMixin, DetailView):
         return context
 
 
-class IssueEditView(LoginRequiredMixin, BootstrapEditableView):
+class EditIssueView(LoginRequiredMixin, BootstrapEditableView):
+    """Edit issue attributes via API."""
     model = Issue
     form_class = IssueEditForm
     fields = ["name", "category", "description", "solver"]
 
-    def test_func(self):
+    def test_func(self) -> bool:
         return self.request.user.has_perm("tracker.change_issue")
 
 
 class UserSelectView(LoginRequiredMixin, PermissionRequiredMixin, AjaxBootstrapSelectView):
+    """Ajax lookup for users."""
     search_model = User
     permission_required = "tracker.change_issue"
 
@@ -67,7 +71,8 @@ class UserSelectView(LoginRequiredMixin, PermissionRequiredMixin, AjaxBootstrapS
                 obj_list]
 
 
-class IssueCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+class CreateIssueView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    """Crate new issue."""
     permission_required = "tracker.create_issue"
     model = Issue
     fields = ("name", "category", "description")
@@ -80,13 +85,15 @@ class IssueCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
         return HttpResponseRedirect(self.get_success_url())
 
 
-class IssueDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteRedirectView):
+class DeleteIssueView(LoginRequiredMixin, PermissionRequiredMixin, DeleteRedirectView):
+    """Delete issue."""
     permission_required = "tracker.delete_issue"
     model = Issue
-    success_url = reverse_lazy("list")
+    success_url = reverse_lazy("issues-list")
 
 
-class IssueUnassignedView(LoginRequiredMixin, PermissionRequiredMixin, SingleObjectMixin, View):
+class UnassignedIssueView(LoginRequiredMixin, PermissionRequiredMixin, SingleObjectMixin, View):
+    """Unassign solver from isssue."""
     model = Issue
     success_url = reverse_lazy("issue-detail")
     permission_required = "tracker.change_issue"
@@ -101,7 +108,8 @@ class IssueUnassignedView(LoginRequiredMixin, PermissionRequiredMixin, SingleObj
         return HttpResponseRedirect(reverse("issue-detail", args=[self.object.pk]))
 
 
-class IssueDoneView(LoginRequiredMixin, SingleObjectMixin, View):
+class DoneIssueView(LoginRequiredMixin, SingleObjectMixin, View):
+    """Mark Issue as done."""
     model = Issue
     success_url = reverse_lazy("issue-detail")
 

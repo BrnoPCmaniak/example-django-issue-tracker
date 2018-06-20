@@ -29,22 +29,29 @@ class IssueCategory(models.Model):
 
 
 class Issue(models.Model):
-    name = models.CharField(verbose_name=_("Name"), help_text=_("The name of the issue."), max_length=254)
-    created_by = models.ForeignKey(User, verbose_name=_("Created by"),
-                                   help_text=_("The person which created the issue."), on_delete=models.CASCADE,
-                                   related_name="issues")
-    solver = models.ForeignKey(User, verbose_name=_("Solver"), help_text=_("The assigned solver of this issue."),
-                               blank=True, null=True, on_delete=models.SET_NULL, related_name="solving_issues")
-    category = models.ForeignKey(IssueCategory, verbose_name=_("Category"), help_text=_("The category of the issue."),
-                                 blank=True, null=True, on_delete=models.SET_NULL)
-    state = models.CharField(choices=ISSUE_STATE_CHOICES, verbose_name=_("State"),
-                             help_text=_("The state of the issue."), null=False, blank=False, default=ISSUE_CREATED,
-                             max_length=4)
-    description = models.TextField(verbose_name=_("Description"), help_text=_("The description of the issue."))
-    completed_in = models.DurationField(blank=True, null=True, verbose_name=_("Completed in"),
-                                        help_text=_("The time duration in which the task was completed."))
-    assigned_at = models.DateTimeField(verbose_name=_("Assiged at"), blank=True, null=True)
-    created_at = models.DateTimeField(verbose_name=_("Created"), auto_now_add=True)
+    name = models.CharField(
+        verbose_name=_("Name"), help_text=_("The name of the issue."), max_length=254)
+    created_by = models.ForeignKey(
+        User, verbose_name=_("Created by"), help_text=_("The person which created the issue."),
+        on_delete=models.CASCADE, related_name="issues")
+    solver = models.ForeignKey(
+        User, verbose_name=_("Solver"), help_text=_("The assigned solver of this issue."),
+        blank=True, null=True, on_delete=models.SET_NULL, related_name="solving_issues")
+    category = models.ForeignKey(
+        IssueCategory, verbose_name=_("Category"), help_text=_("The category of the issue."),
+        blank=True, null=True, on_delete=models.SET_NULL)
+    state = models.CharField(
+        choices=ISSUE_STATE_CHOICES, verbose_name=_("State"), help_text=_("The state of the issue."), null=False,
+        blank=False, default=ISSUE_CREATED, max_length=4)
+    description = models.TextField(
+        verbose_name=_("Description"), help_text=_("The description of the issue."))
+    completed_in = models.DurationField(
+        blank=True, null=True, verbose_name=_("Completed in"),
+        help_text=_("The time duration in which the task was completed."))
+    assigned_at = models.DateTimeField(
+        verbose_name=_("Assiged at"), blank=True, null=True)
+    created_at = models.DateTimeField(
+        verbose_name=_("Created"), auto_now_add=True)
 
     def save(self, *args, **kwargs):
         if self.state == ISSUE_CREATED and self.solver is not None:

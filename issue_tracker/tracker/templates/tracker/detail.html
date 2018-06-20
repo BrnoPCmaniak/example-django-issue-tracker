@@ -9,7 +9,8 @@
     <div class="container">
         <div class="panel panel-default">
             <!-- Default panel contents -->
-            <div class="panel-heading"><h1><a href="{% url "list" %}">{% trans "Issues" %}</a> - {{ object.name }}</h1>
+            <div class="panel-heading"><h1><a href="{% url "issues-list" %}">{% trans "Issues" %}</a>
+                - {{ object.name }}</h1>
             </div>
 
             <div class="panel-body">
@@ -92,7 +93,7 @@
                 {% endfor %}
             ]
         });
-        var options = {
+        let options = {
             ajax: {
                 url: "/users",
                 type: 'POST',
@@ -106,7 +107,7 @@
             langCode: LANGUAGE_CODE,
             log: 3,
             preprocessData: function (data) {
-                var i, l = data.length, array = [];
+                let i, l = data.length, array = [];
                 if (l) {
                     for (i = 0; i < l; i++) {
                         array.push($.extend(true, data[i], {
@@ -122,10 +123,10 @@
             }
         };
 
-        $('.selectpicker').selectpicker().filter('.with-ajax').ajaxSelectPicker(options)
+        $('.selectpicker').selectpicker().filter('.with-ajax').ajaxSelectPicker(options);
         $(document).on('click', '#ajax-clear', function () {
             $("#ajax-select").val('').trigger('change');
-        })
+        });
 
         $(document).on('click', '#ajax-add', function () {
             $.post("{% url "issue-edit" object.pk %}", {

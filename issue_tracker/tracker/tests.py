@@ -111,7 +111,7 @@ class UserSelectViewTestCase(TestCase):
     def test_username_search(self):
         """Test searching for users by their username."""
         u = User.objects.create(username="user_c")
-        response = self.client.post("/users", {"q": u.username})
+        response = self.client.post("/users/", {"q": u.username})
         self.assertEqual(response.status_code, 200)
         self.assertEqual('[{"ID": %d, "Name": "%s", "Username": "%s"}]' % (u.pk, u.username, u.username),
                          response.content.decode('ascii'))
@@ -119,7 +119,7 @@ class UserSelectViewTestCase(TestCase):
     def test_first_name_search(self):
         """Test searching for users by their first name."""
         u = User.objects.create(username="user_d", first_name="John", last_name="Smith")
-        response = self.client.post("/users", {"q": u.first_name})
+        response = self.client.post("/users/", {"q": u.first_name})
         self.assertEqual(response.status_code, 200)
         self.assertEqual('[{"ID": %d, "Name": "%s", "Username": "%s"}]' % (u.pk, u.get_full_name(), u.username),
                          response.content.decode('ascii'))
@@ -127,7 +127,7 @@ class UserSelectViewTestCase(TestCase):
     def test_last_name_search(self):
         """Test searching for users by their last name."""
         u = User.objects.create(username="user_e", first_name="John", last_name="Smith")
-        response = self.client.post("/users", {"q": u.last_name})
+        response = self.client.post("/users/", {"q": u.last_name})
         self.assertEqual(response.status_code, 200)
         self.assertEqual('[{"ID": %d, "Name": "%s", "Username": "%s"}]' % (u.pk, u.get_full_name(), u.username),
                          response.content.decode('ascii'))
@@ -138,7 +138,7 @@ class UserSelectViewTestCase(TestCase):
         c.force_login(self.test_user_2)
         u = User.objects.create(username="user_f")
 
-        response = c.post("/users", {"q": "user_f"})
+        response = c.post("/users/", {"q": "user_f"})
         self.assertEqual(response.status_code, 302)
 
 
