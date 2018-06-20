@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.test import Client, TestCase
 
-from tracker.models import ISSUE_ASSIGNED, ISSUE_CREATED, ISSUE_DONE, Issue, IssueCategory
+from tracker.models import ISSUE_ASSIGNED, ISSUE_CANCELED, ISSUE_CREATED, ISSUE_DONE, Issue, IssueCategory
 
 
 class ModelTestCase(TestCase):
@@ -60,7 +60,6 @@ class ModelTestCase(TestCase):
                       solver=None)
 
         self.assertRaises(ValidationError, issue.full_clean)
-
 
 
 class EditTestCase(TestCase):
@@ -248,6 +247,74 @@ class IssueDoneTestCase(TestCase):
         response = c.get("/issue/done/%d/" % issue.pk)
         self.assertEqual(response.status_code, 302)
         self.assertNotEqual(Issue.objects.get(pk=issue.pk).state, ISSUE_DONE)
+
+
+class IssueCancelTestCase(TestCase):
+    def setUp(self):
+        self.test_user_1 = User.objects.create(username="user_a", is_superuser=True)
+        self.test_user_2 = User.objects.create(username="user_b")
+        self.test_user_3 = User.objects.create(username="user_c")
+
+        self.client_1 = Client()
+        self.client_1.force_login(self.test_user_1)
+        self.client_2 = Client()
+        self.client_2.force_login(self.test_user_2)
+
+    def test_superuser_cancel_assigned(self):
+        """Test marking issue as canceled as superuser while previously been marked as assigned."""
+        issue = Issue.objects.create(name="Test", created_by=self.test_user_1, solver=self.test_user_2,
+                                     description="Test description.")
+        response = self.client_1.get("/issue/cancel/%d/" % issue.pk)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Issue.objects.get(pk=issue.pk).state, ISSUE_CANCELED)
+
+    def test_solver_cancel_assigned(self):
+        """Test marking issue as canceled as solver while previously been marked as assigned."""
+        issue = Issue.objects.create(name="Test", created_by=self.test_user_1, solver=self.test_user_2,
+                                     description="Test description.")
+        response = self.client_2.get("/issue/cancel/%d/" % issue.pk)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Issue.objects.get(pk=issue.pk).state, ISSUE_CANCELED)
+
+    def test_superuser_cancel_unassigned(self):
+        """Test marking issue as canceled as superuser while not been previously marked as assigned."""
+        issue = Issue.objects.create(name="Test", created_by=self.test_user_1, description="Test description.")
+
+        response = self.client_1.get("/issue/cancel/%d/" % issue.pk)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Issue.objects.get(pk=issue.pk).state, ISSUE_CANCELED)
+
+    def test_permission_denied_assigned(self):
+        """When user doesn't haver permission do nothing."""
+        c = Client()
+        c.force_login(self.test_user_3)
+
+        issue = Issue.objects.create(name="Test", created_by=self.test_user_1, solver=self.test_user_2,
+                                     description="Test description.")
+
+        response = c.get("/issue/cancel/%d/" % issue.pk)
+        self.assertEqual(response.status_code, 302)
+        self.assertNotEqual(Issue.objects.get(pk=issue.pk).state, ISSUE_CANCELED)
+
+    def test_permission_denied_unassigned(self):
+        """When user doesn't have permission do nothing."""
+        c = Client()
+        c.force_login(self.test_user_3)
+
+        issue = Issue.objects.create(name="Test", created_by=self.test_user_1, description="Test description.")
+
+        response = c.get("/issue/cancel/%d/" % issue.pk)
+        self.assertEqual(response.status_code, 302)
+        self.assertNotEqual(Issue.objects.get(pk=issue.pk).state, ISSUE_CANCELED)
+
+    def test_superuser_cancel_done(self):
+        """When user try to mark done issue as canceled do nothing."""
+        issue = Issue.objects.create(name="Test", created_by=self.test_user_1, description="Test description.",
+                                     state=ISSUE_DONE)
+
+        response = self.client_1.get("/issue/cancel/%d/" % issue.pk)
+        self.assertEqual(response.status_code, 302)
+        self.assertNotEqual(Issue.objects.get(pk=issue.pk).state, ISSUE_CANCELED)
 
 
 class UnassignedTestCase(TestCase):

@@ -10,7 +10,7 @@ from django.views.generic import CreateView, DetailView, ListView
 from django.views.generic.detail import SingleObjectMixin
 
 from .forms import IssueEditForm
-from .models import ISSUE_ASSIGNED, ISSUE_CREATED, ISSUE_DONE, Issue, IssueCategory
+from .models import ISSUE_ASSIGNED, ISSUE_CANCELED, ISSUE_CREATED, ISSUE_DONE, Issue, IssueCategory
 from .tools import (
     AjaxBootstrapSelectView, BootstrapEditableView, DeleteRedirectView, and_merge_queries)
 
@@ -109,12 +109,24 @@ class UnassignedIssueView(LoginRequiredMixin, PermissionRequiredMixin, SingleObj
 class DoneIssueView(LoginRequiredMixin, SingleObjectMixin, View):
     """Mark Issue as done."""
     model = Issue
-    success_url = reverse_lazy("issue-detail")
 
     def get(self, request, *args, **kwargs) -> HttpResponseRedirect:
         self.object = self.get_object()
         if self.object.state in [ISSUE_ASSIGNED, ISSUE_CREATED] and request.user.has_perm(
                 "tracker.change_issue") or request.user == self.object.solver:
             self.object.state = ISSUE_DONE
+            self.object.save()
+        return HttpResponseRedirect(reverse("issue-detail", args=[self.object.pk]))
+
+
+class CancelIssueView(LoginRequiredMixin, SingleObjectMixin, View):
+    """Mark Issue as canceled."""
+    model = Issue
+
+    def get(self, request, *args, **kwargs) -> HttpResponseRedirect:
+        self.object = self.get_object()
+        if self.object.state not in [ISSUE_DONE, ISSUE_CANCELED] and request.user.has_perm(
+                "tracker.change_issue") or request.user == self.object.solver:
+            self.object.state = ISSUE_CANCELED
             self.object.save()
         return HttpResponseRedirect(reverse("issue-detail", args=[self.object.pk]))

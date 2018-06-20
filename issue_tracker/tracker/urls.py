@@ -1,9 +1,8 @@
 from django.contrib.auth import views as auth_views
 from django.urls import path
 
-from .views import (
-    CreateIssueView, DeleteIssueView, DetailIssueView, DoneIssueView, EditIssueView, ListIssueView,
-    UnassignedIssueView, UserSelectView)
+from .views import (CancelIssueView, CreateIssueView, DeleteIssueView, DetailIssueView, DoneIssueView, EditIssueView,
+                    ListIssueView, UnassignedIssueView, UserSelectView)
 
 urlpatterns = [
     path('accounts/login/', auth_views.login,
@@ -18,6 +17,7 @@ urlpatterns = [
     path('issue/<int:pk>/', DetailIssueView.as_view(), name='issue-detail'),
     path('issue/edit/<int:pk>/', EditIssueView.as_view(), name="issue-edit"),
     path('issue/delete/<int:pk>/', DeleteIssueView.as_view(), name="issue-delete"),
+    path('issue/cancel/<int:pk>/', CancelIssueView.as_view(), name="issue-cancel"),
     path('issue/unassign/<int:pk>/', UnassignedIssueView.as_view(), name="issue-unassign"),
     path('issue/done/<int:pk>/', DoneIssueView.as_view(), name="issue-done"),
     path('users/', UserSelectView.as_view(), name="user-select"),

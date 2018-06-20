@@ -64,7 +64,8 @@ class Issue(models.Model):
         if self.state == ISSUE_CREATED and self.solver is not None:
             self.state = ISSUE_ASSIGNED
             self.assigned_at = timezone.now()
-        elif self.state == ISSUE_DONE and self.completed_in is None:
+        elif self.state == ISSUE_DONE and self.completed_in is None and (
+                self.assigned_at is not None or self.created_at is not None):
             self.completed_in = timedelta(seconds=int((timezone.now() - (self.assigned_at or self.created_at)).seconds))
         super().save(*args, **kwargs)
 

@@ -18,7 +18,8 @@
                     <tbody>
                     <tr>
                         <td style="width: 25%">{% trans "Name" %}</td>
-                        <td style="width: 75%">{% if perms.tracker.change_issue and object.state != "don" %}
+                        <td style="width: 75%">
+                            {% if perms.tracker.change_issue and object.state != "don" and object.state != "can" %}
                             <a href="#" id="name" data-type="text" data-pk="1" data-emptytext="{% trans "Empty" %}"
                                data-url="{% url "issue-edit" object.pk %}" data-name="name"
                                data-title="{% trans "Enter name" %}">{{ object.name }}</a>{% else %}
@@ -31,7 +32,8 @@
                     <tr>
                         <td style="width: 25%">{% trans "Solver" %}</td>
                         <td style="width: 75%">
-                            {% if perms.tracker.change_issue and object.state != "don" %}{% if object.solver == None %}
+                            {% if perms.tracker.change_issue and object.state != "don" and object.state != "can" %}
+                                {% if object.solver == None %}
                                 <select id="ajax-select" class="selectpicker with-ajax"
                                         data-live-search="true"></select>
                                 <button id="ajax-add" type="button" class="btn btn-primary btn-sm adder-buttons"><i
@@ -48,7 +50,8 @@
                     </tr>
                     <tr>
                         <td style="width: 25%">{% trans "Category" %}</td>
-                        <td style="width: 75%">{% if perms.tracker.change_issue and object.state != "don" %}
+                        <td style="width: 75%">
+                            {% if perms.tracker.change_issue and object.state != "don" and object.state != "can" %}
                             <a href="#" id="category" data-type="select" data-pk="1"
                                data-url="{% url "issue-edit" object.pk %}"
                                data-emptytext="{% trans "Empty" %}"
@@ -62,7 +65,7 @@
                     </tr>
                     </tbody>
                 </table>
-                <p>{% if perms.tracker.change_issue and object.state != "don" %}
+                <p>{% if perms.tracker.change_issue and object.state != "don" and object.state != "can" %}
                     <a href="#" id="description" data-type="textarea" data-pk="1" data-rows=10
                        data-emptytext="{% trans "Empty" %}"
                        data-url="{% url "issue-edit" object.pk %}" data-name="description"
@@ -78,11 +81,17 @@
                         <a href="{% url "issue-done" object.pk %}"
                            class="btn btn-primary"><i
                                 class="glyphicon glyphicon-ok"></i> {% trans "Mark as done" %}</a>{% endif %}{% endif %}
+                {% if object.state != "don" and object.state != "can" %}
+                    {% if perms.tracker.change_issue or request.user == object.solver %}
+                        <a href="{% url "issue-cancel" object.pk %}"
+                           class="btn btn-warning"><i
+                                class="glyphicon glyphicon-remove"></i> {% trans "Mark as canceled" %}</a>
+                    {% endif %}{% endif %}
             </div>
         </div>
     </div>
 {% endblock %}
-{% block scripts %}
+{% block scripts %}{% if perms.tracker.change_issue and object.state != "don" and object.state != "can" %}
     <script>
         $("#name").editable();
         $("#description").editable();
@@ -96,7 +105,7 @@
         });
         let options = {
             ajax: {
-                url: "/users",
+                url: "/users/",
                 type: 'POST',
                 dataType: 'json',
                 // Use {% verbatim %}"{{{q}}}"{% endverbatim %} as a placeholder and Ajax Bootstrap Select will
@@ -140,4 +149,4 @@
 
 
     </script>
-{% endblock %}
+{% endif %}{% endblock %}
