@@ -11,7 +11,8 @@ from django.views.generic.detail import SingleObjectMixin
 
 from .forms import IssueEditForm
 from .models import ISSUE_ASSIGNED, ISSUE_CREATED, ISSUE_DONE, Issue, IssueCategory
-from .tools import AjaxBootstrapSelectView, BootstrapEditableView, DeleteRedirectView, and_merge_queries
+from .tools import (
+    AjaxBootstrapSelectView, BootstrapEditableView, DeleteRedirectView, and_merge_queries)
 
 
 class ListIssueView(ListView):

@@ -1,8 +1,9 @@
 from django.contrib.auth import views as auth_views
 from django.urls import path
 
-from .views import DetailIssueView, IssueCreateView, IssueDeleteView, IssueDoneView, IssueEditView, IssueUnassignedView, \
-    ListIssueView, UserSelectView
+from .views import (
+    DetailIssueView, IssueCreateView, IssueDeleteView, IssueDoneView, IssueEditView,
+    IssueUnassignedView, ListIssueView, UserSelectView)
 
 urlpatterns = [
     path('accounts/login', auth_views.login,
