@@ -113,7 +113,7 @@ class DoneIssueView(LoginRequiredMixin, SingleObjectMixin, View):
 
     def get(self, request, *args, **kwargs) -> HttpResponseRedirect:
         self.object = self.get_object()
-        if self.object.state == ISSUE_ASSIGNED and request.user.has_perm(
+        if self.object.state in [ISSUE_ASSIGNED, ISSUE_CREATED] and request.user.has_perm(
                 "tracker.change_issue") or request.user == self.object.solver:
             self.object.state = ISSUE_DONE
             self.object.save()

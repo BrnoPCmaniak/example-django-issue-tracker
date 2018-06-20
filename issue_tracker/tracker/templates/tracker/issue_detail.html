@@ -32,19 +32,19 @@
                         <td style="width: 25%">{% trans "Solver" %}</td>
                         <td style="width: 75%">
                             {% if perms.tracker.change_issue and object.state != "don" %}{% if object.solver == None %}
-                            <select id="ajax-select" class="selectpicker with-ajax"
-                                    data-live-search="true"></select>
-                            <button id="ajax-add" type="button" class="btn btn-primary btn-sm adder-buttons"><i
-                                    class="glyphicon glyphicon-ok"></i></button>
-                            <button id="ajax-clear" type="button" class="btn btn-danger btn-sm adder-buttons"><i
-                                    class="glyphicon glyphicon-trash"></i></button>
+                                <select id="ajax-select" class="selectpicker with-ajax"
+                                        data-live-search="true"></select>
+                                <button id="ajax-add" type="button" class="btn btn-primary btn-sm adder-buttons"><i
+                                        class="glyphicon glyphicon-ok"></i></button>
+                                <button id="ajax-clear" type="button" class="btn btn-danger btn-sm adder-buttons"><i
+                                        class="glyphicon glyphicon-trash"></i></button>
                             {% else %}
                                 {{ object.solver|default_if_none:"" }}
                                 <a href="{% url "issue-unassign" object.pk %}" class="btn btn-danger btn-sm"><i
                                         class="glyphicon glyphicon-trash"></i></a>
                             {% endif %}
-                        {% else %}
-                            {{ object.solver|default_if_none:"" }}{% endif %}</td>
+                            {% else %}
+                                {{ object.solver|default_if_none:"" }}{% endif %}</td>
                     </tr>
                     <tr>
                         <td style="width: 25%">{% trans "Category" %}</td>
@@ -73,10 +73,11 @@
                     <a href="{% url "issue-delete" object.pk %}"
                        class="btn btn-danger"><i
                             class="glyphicon glyphicon-trash"></i> {% trans "Delete issue" %}</a>{% endif %}
-                {% if object.state == "ass" %}
+                {% if object.state == "ass" or object.state == "cre" %}
                     {% if perms.tracker.change_issue or request.user == object.solver %}
                         <a href="{% url "issue-done" object.pk %}"
-                           class="btn btn-primary">{% trans "Mark as done" %}</a>{% endif %}{% endif %}
+                           class="btn btn-primary"><i
+                                class="glyphicon glyphicon-ok"></i> {% trans "Mark as done" %}</a>{% endif %}{% endif %}
             </div>
         </div>
     </div>

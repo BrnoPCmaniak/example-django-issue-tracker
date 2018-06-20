@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -53,12 +54,18 @@ class Issue(models.Model):
     created_at = models.DateTimeField(
         verbose_name=_("Created"), auto_now_add=True)
 
+    def clean(self):
+        """Validate state with other fields."""
+        if self.state == ISSUE_ASSIGNED and self.solver is None:
+            raise ValidationError(_('State marked as assigned but no solver is assigned.'))
+        super().clean()
+
     def save(self, *args, **kwargs):
         if self.state == ISSUE_CREATED and self.solver is not None:
             self.state = ISSUE_ASSIGNED
             self.assigned_at = timezone.now()
         elif self.state == ISSUE_DONE and self.completed_in is None:
-            self.completed_in = timedelta(seconds=int((timezone.now() - self.assigned_at).seconds))
+            self.completed_in = timedelta(seconds=int((timezone.now() - (self.assigned_at or self.created_at)).seconds))
         super().save(*args, **kwargs)
 
     def __str__(self):

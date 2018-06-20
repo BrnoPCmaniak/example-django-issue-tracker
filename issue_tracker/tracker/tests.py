@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.test import Client, TestCase
 
 from tracker.models import ISSUE_ASSIGNED, ISSUE_CREATED, ISSUE_DONE, Issue, IssueCategory
@@ -38,6 +38,29 @@ class ModelTestCase(TestCase):
 
         self.assertEqual(issue.state, ISSUE_DONE)
         self.assertIsNotNone(issue.completed_in)
+
+    def test_done_without_assigned(self):
+        """Test that issue can be marked as done without having to be assigned first."""
+        issue = Issue.objects.create(name="Test", created_by=self.test_user_1, description="Test description.")
+
+        self.assertEqual(issue.state, ISSUE_CREATED)
+        self.assertIsNone(issue.solver)
+        self.assertIsNone(issue.assigned_at)
+
+        issue.state = ISSUE_DONE
+        issue.save()
+
+        self.assertEqual(issue.state, ISSUE_DONE)
+        self.assertIsNotNone(issue.completed_in)
+
+    def test_clean_assigned(self):
+        """Test that when state is marked as assigned issue have to have solver."""
+        issue = Issue(name="Test", created_by=self.test_user_1, description="Test description.",
+                      state=ISSUE_ASSIGNED,
+                      solver=None)
+
+        self.assertRaises(ValidationError, issue.full_clean)
+
 
 
 class EditTestCase(TestCase):
@@ -179,29 +202,48 @@ class IssueDoneTestCase(TestCase):
         self.client_2 = Client()
         self.client_2.force_login(self.test_user_2)
 
-    def test_superuser_done(self):
-        """Test marking issue as done as superuser."""
+    def test_superuser_done_assigned(self):
+        """Test marking issue as done as superuser while previously been marked as assigned."""
         issue = Issue.objects.create(name="Test", created_by=self.test_user_1, solver=self.test_user_2,
                                      description="Test description.")
         response = self.client_1.get("/issue/done/%d/" % issue.pk)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Issue.objects.get(pk=issue.pk).state, ISSUE_DONE)
 
-    def test_solver_done(self):
-        """Test marking issue as done as solver."""
+    def test_solver_done_assigned(self):
+        """Test marking issue as done as solver while previously been marked as assigned."""
         issue = Issue.objects.create(name="Test", created_by=self.test_user_1, solver=self.test_user_2,
                                      description="Test description.")
         response = self.client_2.get("/issue/done/%d/" % issue.pk)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Issue.objects.get(pk=issue.pk).state, ISSUE_DONE)
 
-    def test_permission_denied(self):
+    def test_superuser_done_unassigned(self):
+        """Test marking issue as done as superuser while not been previously marked as assigned."""
+        issue = Issue.objects.create(name="Test", created_by=self.test_user_1, description="Test description.")
+
+        response = self.client_1.get("/issue/done/%d/" % issue.pk)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Issue.objects.get(pk=issue.pk).state, ISSUE_DONE)
+
+    def test_permission_denied_assigned(self):
         """When user doesn't haver permission do nothing."""
         c = Client()
         c.force_login(self.test_user_3)
 
         issue = Issue.objects.create(name="Test", created_by=self.test_user_1, solver=self.test_user_2,
                                      description="Test description.")
+
+        response = c.get("/issue/done/%d/" % issue.pk)
+        self.assertEqual(response.status_code, 302)
+        self.assertNotEqual(Issue.objects.get(pk=issue.pk).state, ISSUE_DONE)
+
+    def test_permission_denied_unassigned(self):
+        """When user doesn't haver permission do nothing."""
+        c = Client()
+        c.force_login(self.test_user_3)
+
+        issue = Issue.objects.create(name="Test", created_by=self.test_user_1, description="Test description.")
 
         response = c.get("/issue/done/%d/" % issue.pk)
         self.assertEqual(response.status_code, 302)
