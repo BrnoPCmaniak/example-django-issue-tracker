@@ -1,6 +1,6 @@
 from typing import Dict, List
 
-from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.models import User
 from django.db.models import Avg, Max, Min, Q
 from django.http import HttpResponseRedirect
@@ -15,7 +15,7 @@ from .tools import (
     AjaxBootstrapSelectView, BootstrapEditableView, DeleteRedirectView, and_merge_queries)
 
 
-class ListIssueView(ListView):
+class ListIssueView(LoginRequiredMixin, ListView):
     model = Issue
     template_name = "tracker/list.html"
 
@@ -29,7 +29,7 @@ class ListIssueView(ListView):
         return context
 
 
-class DetailIssueView(DetailView):
+class DetailIssueView(LoginRequiredMixin, DetailView):
     model = Issue
     template_name = "tracker/detail.html"
 
@@ -39,7 +39,7 @@ class DetailIssueView(DetailView):
         return context
 
 
-class IssueEditView(BootstrapEditableView):
+class IssueEditView(LoginRequiredMixin, BootstrapEditableView):
     model = Issue
     form_class = IssueEditForm
     fields = ["name", "category", "description", "solver"]
@@ -48,7 +48,7 @@ class IssueEditView(BootstrapEditableView):
         return self.request.user.has_perm("tracker.change_issue")
 
 
-class UserSelectView(PermissionRequiredMixin, AjaxBootstrapSelectView):
+class UserSelectView(LoginRequiredMixin, PermissionRequiredMixin, AjaxBootstrapSelectView):
     search_model = User
     permission_required = "tracker.change_issue"
 
@@ -67,7 +67,7 @@ class UserSelectView(PermissionRequiredMixin, AjaxBootstrapSelectView):
                 obj_list]
 
 
-class IssueCreateView(PermissionRequiredMixin, CreateView):
+class IssueCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     permission_required = "tracker.create_issue"
     model = Issue
     fields = ("name", "category", "description")
@@ -80,13 +80,13 @@ class IssueCreateView(PermissionRequiredMixin, CreateView):
         return HttpResponseRedirect(self.get_success_url())
 
 
-class IssueDeleteView(PermissionRequiredMixin, DeleteRedirectView):
+class IssueDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteRedirectView):
     permission_required = "tracker.delete_issue"
     model = Issue
     success_url = reverse_lazy("list")
 
 
-class IssueUnassignedView(PermissionRequiredMixin, SingleObjectMixin, View):
+class IssueUnassignedView(LoginRequiredMixin, PermissionRequiredMixin, SingleObjectMixin, View):
     model = Issue
     success_url = reverse_lazy("issue-detail")
     permission_required = "tracker.change_issue"
@@ -101,7 +101,7 @@ class IssueUnassignedView(PermissionRequiredMixin, SingleObjectMixin, View):
         return HttpResponseRedirect(reverse("issue-detail", args=[self.object.pk]))
 
 
-class IssueDoneView(SingleObjectMixin, View):
+class IssueDoneView(LoginRequiredMixin, SingleObjectMixin, View):
     model = Issue
     success_url = reverse_lazy("issue-detail")
 
