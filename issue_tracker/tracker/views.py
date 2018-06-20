@@ -38,11 +38,13 @@ class DetailIssueView(DetailView):
         return context
 
 
-class IssueEditView(PermissionRequiredMixin, BootstrapEditableView):
+class IssueEditView(BootstrapEditableView):
     model = Issue
     form_class = IssueEditForm
-    permission_required = "tracker.change_issue"
     fields = ["name", "category", "description", "solver"]
+
+    def test_func(self):
+        return self.request.user.has_perm("tracker.change_issue")
 
 
 class UserSelectView(PermissionRequiredMixin, AjaxBootstrapSelectView):
@@ -80,6 +82,7 @@ class IssueCreateView(PermissionRequiredMixin, CreateView):
 class IssueDeleteView(PermissionRequiredMixin, DeleteRedirectView):
     permission_required = "tracker.delete_issue"
     model = Issue
+    success_url = reverse_lazy("list")
 
 
 class IssueUnassignedView(PermissionRequiredMixin, SingleObjectMixin, View):
